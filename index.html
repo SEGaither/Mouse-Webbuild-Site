@@ -1,1 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deep Water Fossils Builder</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar left-sidebar">
+      <div class="panel">
+        <h2>Builder</h2>
+        <p class="muted">Drag, resize, add, delete, and save directly in the browser.</p>
+      </div>
 
+      <div class="panel">
+        <h3>Add Elements</h3>
+        <div class="stack">
+          <button class="tool-btn" data-add="heading">Add Heading</button>
+          <button class="tool-btn" data-add="text">Add Text</button>
+          <button class="tool-btn" data-add="button">Add Button</button>
+          <button class="tool-btn" data-add="image">Add Image</button>
+          <button class="tool-btn" data-add="card">Add Card</button>
+          <button class="tool-btn" data-add="section">Add Section</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Page Actions</h3>
+        <div class="stack">
+          <button id="saveLayoutBtn" class="tool-btn">Save Layout</button>
+          <button id="resetLayoutBtn" class="tool-btn danger">Reset Layout</button>
+          <button id="exportHtmlBtn" class="tool-btn">Export HTML</button>
+          <button id="exportJsonBtn" class="tool-btn">Export JSON</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Instructions</h3>
+        <ul class="help-list">
+          <li>Click any element to select it.</li>
+          <li>Drag selected element by its body.</li>
+          <li>Resize using the bottom-right handle.</li>
+          <li>Double-click text to edit inline.</li>
+          <li>Use the right panel for properties.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace-header">
+        <div>
+          <h1>Deep Water Fossils Site Builder</h1>
+          <p class="muted">Visual editor with mouse-based drag, resize, add, delete, and save.</p>
+        </div>
+        <div class="workspace-actions">
+          <button id="previewToggleBtn" class="tool-btn secondary">Preview Mode</button>
+        </div>
+      </header>
+
+      <div class="canvas-wrap">
+        <div id="siteCanvas" class="site-canvas" aria-label="Editable site canvas"></div>
+      </div>
+    </main>
+
+    <aside class="sidebar right-sidebar">
+      <div class="panel">
+        <h3>Selected Element</h3>
+        <div id="noSelectionState" class="muted">Nothing selected.</div>
+
+        <div id="selectionPanel" class="hidden">
+          <div class="field">
+            <label for="propType">Type</label>
+            <input id="propType" type="text" disabled />
+          </div>
+
+          <div class="field">
+            <label for="propText">Text / Label</label>
+            <textarea id="propText" rows="5"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="propHref">Link URL</label>
+            <input id="propHref" type="text" placeholder="https://..." />
+          </div>
+
+          <div class="field">
+            <label for="propSrc">Image URL</label>
+            <input id="propSrc" type="text" placeholder="./images/example.jpg" />
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="propX">X</label>
+              <input id="propX" type="number" />
+            </div>
+            <div class="field">
+              <label for="propY">Y</label>
+              <input id="propY" type="number" />
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="propW">Width</label>
+              <input id="propW" type="number" />
+            </div>
+            <div class="field">
+              <label for="propH">Height</label>
+              <input id="propH" type="number" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="propBg">Background</label>
+            <input id="propBg" type="text" placeholder="#123456 or linear-gradient(...)" />
+          </div>
+
+          <div class="field">
+            <label for="propColor">Text Color</label>
+            <input id="propColor" type="text" placeholder="#ffffff" />
+          </div>
+
+          <div class="field">
+            <label for="propFontSize">Font Size</label>
+            <input id="propFontSize" type="number" />
+          </div>
+
+          <div class="field">
+            <label for="propRadius">Border Radius</label>
+            <input id="propRadius" type="number" />
+          </div>
+
+          <div class="field">
+            <label for="propAlign">Text Align</label>
+            <select id="propAlign">
+              <option value="left">left</option>
+              <option value="center">center</option>
+              <option value="right">right</option>
+            </select>
+          </div>
+
+          <div class="stack">
+            <button id="duplicateBtn" class="tool-btn">Duplicate</button>
+            <button id="bringForwardBtn" class="tool-btn">Bring Forward</button>
+            <button id="sendBackwardBtn" class="tool-btn">Send Backward</button>
+            <button id="deleteBtn" class="tool-btn danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <template id="defaultLayoutTemplate">
+    [
+      {
+        "id": "el-header",
+        "type": "section",
+        "x": 24,
+        "y": 20,
+        "w": 1152,
+        "h": 80,
+        "text": "",
+        "href": "",
+        "src": "",
+        "style": {
+          "background": "linear-gradient(180deg, rgba(4,17,26,0.92), rgba(4,17,26,0.78))",
+          "color": "#f4f7fa",
+          "fontSize": 16,
+          "radius": 18,
+          "textAlign": "left"
+        },
+        "children": [
+          {
+            "id": "el-logo",
+            "type": "image",
+            "x": 20,
+            "y": 13,
+            "w": 56,
+            "h": 56,
+            "text": "",
+            "href": "",
+            "src": "./images/logo.jpg",
+            "style": {
+              "background": "transparent",
+              "color": "#ffffff",
+              "fontSize": 16,
+              "radius": 28,
+              "textAlign": "left"
+            }
+          },
+          {
+            "id": "el-brand",
+            "type": "heading",
+            "x": 90,
+            "y": 20,
+            "w": 260,
+            "h": 38,
+            "text": "Deep Water Fossils",
+            "href": "",
+            "src": "",
+            "style": {
+              "background": "transparent",
+              "color": "#dfbe84",
+              "fontSize": 30,
+              "radius": 0,
+              "textAlign": "left"
+            }
+          },
+          {
+            "id": "el-nav1",
+            "type": "button",
+            "x": 744,
+            "y": 20,
+            "w": 90,
+            "h": 38,
+            "text": "Home",
+            "href": "#",
+            "src": "",
+            "style": {
+              "background": "rgba(255,255,255,0.05)",
+              "color": "#f4f7fa",
+              "fontSize": 16,
+              "radius": 999,
+              "textAlign": "center"
+            }
+          },
+          {
+            "id": "el-nav2",
+            "type": "button",
+            "x": 844,
+            "y": 20,
+            "w": 90,
+            "h": 38,
+            "text": "Shop",
+            "href": "#",
+            "src": "",
+            "style": {
+              "background": "rgba(255,255,255,0.05)",
+              "color": "#f4f7fa",
+              "fontSize": 16,
+              "radius": 999,
+              "textAlign": "center"
+            }
+          },
+          {
+            "id": "el-nav3",
+            "type": "button",
+            "x": 944,
+            "y": 20,
+            "w": 90,
+            "h": 38,
+            "text": "About",
+            "href": "#",
+            "src": "",
+            "style": {
+              "background": "rgba(255,255,255,0.05)",
+              "color": "#f4f7fa",
+              "fontSize": 16,
+              "radius": 999,
+              "textAlign": "center"
+            }
+          },
+          {
+            "id": "el-nav4",
+            "type": "button",
+            "x": 1044,
+            "y": 20,
+            "w": 90,
+            "h": 38,
+            "text": "Contact",
+            "href": "#",
+            "src": "",
+            "style": {
+              "background": "rgba(255,255,255,0.05)",
+              "color": "#f4f7fa",
+              "fontSize": 16,
+              "radius": 999,
+              "textAlign": "center"
+            }
+          }
+        ]
+      },
+      {
+        "id": "el-hero-bg",
+        "type": "section",
+        "x": 24,
+        "y": 118,
+        "w": 1152,
+        "h": 540,
+        "text": "",
+        "href": "",
+        "src": "",
+        "style": {
+          "background": "linear-gradient(180deg, rgba(7,29,41,0.92), rgba(11,47,62,0.82))",
+          "color": "#f4f7fa",
+          "fontSize": 16,
+          "radius": 28,
+          "textAlign": "left"
+        }
+      },
+      {
+        "id": "el-hero-heading",
+        "type": "heading",
+        "x": 86,
+        "y": 210,
+        "w": 420,
+        "h": 120,
+        "text": "Authentic Fossil Shark Teeth",
+        "href": "",
+        "src": "",
+        "style": {
+          "background": "transparent",
+          "color": "#ffffff",
+          "fontSize": 64,
+          "radius": 0,
+          "textAlign": "left"
+        }
+      },
+      {
+        "id": "el-hero-text",
+        "type": "text",
+        "x": 90,
+        "y": 356,
+        "w": 420,
+        "h": 64,
+        "text": "Recovered from the ocean floor by divers. Every fossil is real, photographed individually, and ready for collectors.",
+        "href": "",
+        "src": "",
+        "style": {
+          "background": "transparent",
+          "color": "#d9e2e8",
+          "fontSize": 20,
+          "radius": 0,
+          "textAlign": "left"
+        }
+      },
+      {
+        "id": "el-hero-btn",
+        "type": "button",
+        "x": 90,
+        "y": 448,
+        "w": 180,
+        "h": 54,
+        "text": "Shop Fossils",
+        "href": "#",
+        "src": "",
+        "style": {
+          "background": "linear-gradient(180deg, #e0c28b 0%, #c9a76a 100%)",
+          "color": "#0a1219",
+          "fontSize": 18,
+          "radius": 999,
+          "textAlign": "center"
+        }
+      },
+      {
+        "id": "el-hero-image",
+        "type": "image",
+        "x": 640,
+        "y": 150,
+        "w": 470,
+        "h": 450,
+        "text": "",
+        "href": "",
+        "src": "./images/big-brown.jpg",
+        "style": {
+          "background": "rgba(255,255,255,0.03)",
+          "color": "#ffffff",
+          "fontSize": 16,
+          "radius": 24,
+          "textAlign": "left"
+        }
+      },
+      {
+        "id": "el-trust",
+        "type": "section",
+        "x": 24,
+        "y": 684,
+        "w": 1152,
+        "h": 84,
+        "text": "",
+        "href": "",
+        "src": "",
+        "style": {
+          "background": "linear-gradient(180deg, rgba(4,17,26,0.88), rgba(4,17,26,0.72))",
+          "color": "#f4f7fa",
+          "fontSize": 16,
+          "radius": 18,
+          "textAlign": "left"
+        },
+        "children": [
+          {
+            "id": "el-trust1",
+            "type": "text",
+            "x": 56,
+            "y": 28,
+            "w": 250,
+            "h": 24,
+            "text": "Verified Authenticity",
+            "href": "",
+            "src": "",
+            "style": {
+              "background": "transparent",
+              "color": "#f4f7fa",
+              "fontSize": 18,
+              "radius": 0,
+              "textAlign": "center"
+            }
+          },
+          {
+            "id": "el-trust2",
+            "type": "text",
+            "x": 445,
+            "y": 28,
+            "w": 250,
+            "h": 24,
+            "text": "Ethically Recovered",
+            "href": "",
+            "src": "",
+            "style": {
+              "background": "transparent",
+              "color": "#f4f7fa",
+              "fontSize": 18,
+              "radius": 0,
+              "textAlign": "center"
+            }
+          },
+          {
+            "id": "el-trust3",
+            "type": "text",
+            "x": 836,
+            "y": 28,
+            "w": 250,
+            "h": 24,
+            "text": "Fast Secure Shipping",
+            "href": "",
+            "src": "",
+            "style": {
+              "background": "transparent",
+              "color": "#f4f7fa",
+              "fontSize": 18,
+              "radius": 0,
+              "textAlign": "center"
+            }
+          }
+        ]
+      }
+    ]
+  </template>
+
+  <script src="./editor.js"></script>
+</body>
+</html>
